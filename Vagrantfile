@@ -15,14 +15,20 @@ Vagrant.configure("2") do |config|
     config.vm.box = "ubuntu/bionic64"
     config.vm.box_version = "~> 20200304.0.0"
    
+    # By default, ports are not automatically accesible on any guest machine
+    # We must forward a port to make it accessible
     config.vm.network "forwarded_port", guest: 8000, host: 8000
    
     config.vm.provision "shell", inline: <<-SHELL
+      # Disable autoupdate
       systemctl disable apt-daily.service
       systemctl disable apt-daily.timer
     
+      # Update local repository and download required packages
       sudo apt-get update
       sudo apt-get install -y python3-venv zip
+
+      # Set Python3 as the default Python version
       touch /home/vagrant/.bash_aliases
       if ! grep -q PYTHON_ALIAS_ADDED /home/vagrant/.bash_aliases; then
         echo "# PYTHON_ALIAS_ADDED" >> /home/vagrant/.bash_aliases
